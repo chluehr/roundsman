@@ -9,19 +9,18 @@
 #
 #-----------------------------------------------------------
 
-installJavaTask ()
+installToolsTask ()
 {
+    echo "Installing misc. tool packages"
 
-    echo "Checking / enabling 'partner' Ubuntu repository"
-        grep -q -r '^deb .* partner' /etc/apt/sources.list         ||
-        ( echo "Ubuntu 'partner' repository not enabled."
-        sudo sed -i -e "s|^# deb (.*) partner.*$|deb \1 partner|" /etc/apt/sources.list
-    )
-
-    sudo apt-get update &&
-    sudo apt-get --assume-yes install  sun-java6-jdk &&
-    sudo update-java-alternatives -s java-6-sun
+    sudo apt-get --assume-yes install       \
+        vim                                 \
+        git-core                            \
+        imagemagick                         \
+        rsync                               \
+        screen
 }
+
 
 installExtrasTask ()
 {
@@ -29,9 +28,7 @@ installExtrasTask ()
 
     echo "Installing MySQL server, Memcache & Beanstalk daemons"
 
-    export DEBIAN_FRONTEND=noninteractive
-
-    sudo apt-get --assume-yes install     \
+    sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install     \
         mysql-server                      \
         beanstalkd                        \
         memcached
@@ -39,6 +36,12 @@ installExtrasTask ()
     # activate beanstalkd:
     sudo echo "START=yes" >> /etc/default/beanstalkd
     sudo /etc/init.d/beanstalkd restart
+
+    # mysql innodb file per table settings:
+    grep -q -r '^innodb_file_per_table' /etc/mysql/my.cnf         ||
+    (
+        sudo sed -i -e "s|^\[mysqld\]$|[mysqld]\ninnodb_file_per_table\n|" /etc/mysql/my.cnf
+    )
 
 }
 
@@ -74,12 +77,21 @@ upgradeSystemTask ()
     sudo apt-get --assume-yes upgrade
 }
 
+installApacheTask ()
+{
+    echo "Enabling Apache mod_rewrite & restarting Apache"
+
+    sudo a2enmod rewrite
+    sudo apache2ctl graceful
+}
+
 #-----------------------------------------------------------
 
     upgradeSystemTask
 
-    installJavaTask
+    installToolsTask
     installExtrasTask
     installPhpTask
-    
+    installApacheTask
+
 #------------------------------------------------------- eof
