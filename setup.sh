@@ -2,11 +2,12 @@
 #-----------------------------------------------------------
 #
 # Purpose: Just run this script to setup a typical working
-#          php environment
+#          php environment - better use puppet or chef for
+#          real servers!
 #
 # Build and tested for ubuntu-10.04.4-server-amd64.iso
 # wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup.sh | bash
-#
+# (do not execute that line blindly)
 #-----------------------------------------------------------
 
 installToolsTask ()
@@ -41,6 +42,7 @@ installExtrasTask ()
     grep -q -r '^innodb_file_per_table' /etc/mysql/my.cnf         ||
     (
         sudo sed -i -e "s|^\[mysqld\]$|[mysqld]\ninnodb_file_per_table\n|" /etc/mysql/my.cnf
+        sudo restart mysql
     )
 
 }
