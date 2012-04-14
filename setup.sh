@@ -35,7 +35,7 @@ installExtrasTask ()
         memcached
 
     # activate beanstalkd:
-    sudo echo "START=yes" >> /etc/default/beanstalkd
+    sudo sed -i -e "s|^#START=yes.*$|START=yes|" /etc/default/beanstalkd
     sudo /etc/init.d/beanstalkd restart
 
     # mysql innodb file per table settings:
@@ -52,7 +52,6 @@ installPhpTask ()
 
     sudo apt-get --assume-yes install    \
          libapache2-mod-php5             \
-         php-pear                        \
          php5-mysql                      \
          php5-sqlite                     \
          php5-xdebug                     \
@@ -69,8 +68,22 @@ installPhpTask ()
     echo "Raising memory limit in php.ini files"
     sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/apache2/php.ini
     sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/cli/php.ini
+
+    echo "Fix annoying notice regarding wrong comment in mcrypt ini file"
+    sudo sed -i -r -e 's/^#(.*)$/;\1/' /etc/php5/cli/conf.d/mcrypt.ini
 }
 
+installPearTask ()
+{
+    echo "Installing pear and phing"
+
+    sudo apt-get --assume-yes install php-pear
+
+    sudo pear channel-update pear.php.net
+    sudo pear upgrade
+    sudo pear channel-discover pear.phing.info
+    sudo pear install phing/phing
+}
 
 upgradeSystemTask ()
 {
@@ -94,6 +107,7 @@ installApacheTask ()
     installToolsTask
     installExtrasTask
     installPhpTask
+    installPearTask
     installApacheTask
 
 #------------------------------------------------------- eof
