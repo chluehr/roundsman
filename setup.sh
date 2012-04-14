@@ -16,7 +16,7 @@ upgradeSystemTask ()
     # ask once for sudo password ..
     sudo true
 
-    echo "Upgrading system"
+    echo "Upgrading system ..."
 
     sudo apt-get -qq update                 &&
     sudo apt-get -qq --assume-yes upgrade   &&
@@ -26,7 +26,7 @@ upgradeSystemTask ()
 
 installToolsTask ()
 {
-    echo "Installing misc. tool packages"
+    echo "Installing misc. tool packages ..."
 
     sudo apt-get -qq --assume-yes install   \
         vim                                 \
@@ -43,7 +43,7 @@ installExtrasTask ()
 {
     # typical 3rd party systems (db,cache ..):
 
-    echo "Installing MySQL server, Memcache & Beanstalk daemons"
+    echo "Installing MySQL server, Memcache & Beanstalk daemons ..."
 
     sudo DEBIAN_FRONTEND=noninteractive apt-get -qq --assume-yes install     \
         mysql-server                        \
@@ -68,7 +68,7 @@ installExtrasTask ()
 installPhpTask ()
 {
 
-    echo "Installing PHP related packages"
+    echo "Installing PHP related packages ..."
     sudo apt-get -qq --assume-yes install   \
         libapache2-mod-php5             \
         php5-cli                        \
@@ -88,36 +88,42 @@ installPhpTask ()
 
     # update php memory limit
 
-    echo "Raising memory limit in php.ini files"
-    sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/apache2/php.ini
-    sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/cli/php.ini
+    echo -n "Raising memory limit in php.ini files ... "
+    sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/apache2/php.ini    &&
+        sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/cli/php.ini    &&
+        echo "OK"   ||
+        exit 1
 
-    echo "Fixing annoying notice regarding wrong comment in mcrypt ini file"
-    sudo sed -i -r -e 's/^#(.*)$/;\1/' /etc/php5/cli/conf.d/mcrypt.ini
+    echo -n "Fixing annoying notice regarding wrong comment in mcrypt ini file ... "
+    sudo sed -i -r -e 's/^#(.*)$/;\1/' /etc/php5/cli/conf.d/mcrypt.ini  &&
+        echo "OK" ||
+        exit 1
 }
 
 installPearTask ()
 {
-    echo "Installing pear"
+    echo "Installing pear ..."
 
     sudo apt-get -qq --assume-yes install php-pear  &&
     echo "... OK"                                   ||
     exit 1
 
-    echo "Installing phing"
+    echo "Installing phing ... "
     sudo pear -qq channel-update pear.php.net
     sudo pear -qq upgrade
     sudo pear -qq channel-discover pear.phing.info
     sudo pear -qq install phing/phing 2>&1 >/dev/null
 
     # test for phing:
-    phing -v 2>&1 >/dev/null || exit 1
+    phing -v 2>&1 >/dev/null    &&
+        echo "... OK"           ||
+        exit 1
 
 }
 
 installApacheTask ()
 {
-    echo "Enabling Apache mod_rewrite & restarting Apache"
+    echo "Enabling Apache mod_rewrite & restarting Apache ..."
 
     sudo a2enmod rewrite
     sudo apache2ctl graceful
