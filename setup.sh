@@ -12,14 +12,16 @@
 
 installToolsTask ()
 {
-    echo "Installing misc. tool packages"
+    echo -n "Installing misc. tool packages ... "
 
-    sudo apt-get --assume-yes install       \
+    sudo apt-get -qq --assume-yes install   \
         vim                                 \
         git-core                            \
         imagemagick                         \
         rsync                               \
-        screen
+        screen                              &&
+        echo "OK"                           ||
+        ( echo "FAILED";  exit 1 )
 }
 
 
@@ -27,12 +29,14 @@ installExtrasTask ()
 {
     # typical 3rd party systems (db,cache ..):
 
-    echo "Installing MySQL server, Memcache & Beanstalk daemons"
+    echo -n "Installing MySQL server, Memcache & Beanstalk daemons ... "
 
     sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install     \
-        mysql-server                      \
-        beanstalkd                        \
-        memcached
+        mysql-server                        \
+        beanstalkd                          \
+        memcached                           &&
+        echo "OK"                           ||
+        ( echo "FAILED";  exit 1 )
 
     # activate beanstalkd:
     sudo sed -i -e "s|^#START=yes.*$|START=yes|" /etc/default/beanstalkd
@@ -50,18 +54,22 @@ installExtrasTask ()
 installPhpTask ()
 {
 
-    sudo apt-get --assume-yes install    \
-         libapache2-mod-php5             \
-         php5-mysql                      \
-         php5-sqlite                     \
-         php5-xdebug                     \
-         php5-xcache                     \
-         php5-suhosin                    \
-         php5-gd                         \
-         php5-mcrypt                     \
-         php5-xsl                        \
-         php5-curl                       \
-         php5-memcache
+    echo -n "Installing PHP related packages ... "
+    sudo apt-get --assume-yes install   \
+        libapache2-mod-php5             \
+        php5-mysql                      \
+        php5-sqlite                     \
+        php5-xdebug                     \
+        php5-xcache                     \
+        php5-suhosin                    \
+        php5-gd                         \
+        php5-mcrypt                     \
+        php5-xsl                        \
+        php5-curl                       \
+        php5-memcache                   &&
+        echo "OK"                       ||
+        ( echo "FAILED";  exit 1 )
+
 
     # update php memory limit
 
@@ -69,27 +77,33 @@ installPhpTask ()
     sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/apache2/php.ini
     sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/cli/php.ini
 
-    echo "Fix annoying notice regarding wrong comment in mcrypt ini file"
+    echo "Fixing annoying notice regarding wrong comment in mcrypt ini file"
     sudo sed -i -r -e 's/^#(.*)$/;\1/' /etc/php5/cli/conf.d/mcrypt.ini
 }
 
 installPearTask ()
 {
-    echo "Installing pear and phing"
+    echo -n "Installing pear ... "
 
-    sudo apt-get --assume-yes install php-pear
+    sudo apt-get -qq --assume-yes install php-pear  &&
+    echo "OK"                                       ||
+    ( echo "FAILED";  exit 1 )
 
-    sudo pear channel-update pear.php.net
-    sudo pear upgrade
-    sudo pear channel-discover pear.phing.info
-    sudo pear install phing/phing
+    echo "Installing phing"
+    sudo pear -qq channel-update pear.php.net
+    sudo pear -qq upgrade
+    sudo pear -qq channel-discover pear.phing.info
+    sudo pear -qq install phing/phing
 }
 
 upgradeSystemTask ()
 {
-    echo "Upgrade system"
-    sudo apt-get update
-    sudo apt-get --assume-yes upgrade
+    echo -n "Upgrading system ... "
+
+    sudo apt-get -qq update                 &&
+    sudo apt-get -qq --assume-yes upgrade   &&
+    echo "OK"                               ||
+    ( echo "FAILED";  exit 1 )
 }
 
 installApacheTask ()
