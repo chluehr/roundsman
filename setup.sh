@@ -12,7 +12,7 @@
 
 installToolsTask ()
 {
-    echo -n "Installing misc. tool packages ... "
+    echo "Installing misc. tool packages"
 
     sudo apt-get -qq --assume-yes install   \
         vim                                 \
@@ -20,8 +20,8 @@ installToolsTask ()
         imagemagick                         \
         rsync                               \
         screen                              &&
-        echo "OK"                           ||
-        ( echo "FAILED";  exit 1 )
+        echo "... OK"                       ||
+        exit 1
 }
 
 
@@ -29,14 +29,14 @@ installExtrasTask ()
 {
     # typical 3rd party systems (db,cache ..):
 
-    echo -n "Installing MySQL server, Memcache & Beanstalk daemons ... "
+    echo "Installing MySQL server, Memcache & Beanstalk daemons"
 
     sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install     \
         mysql-server                        \
         beanstalkd                          \
         memcached                           &&
-        echo "OK"                           ||
-        ( echo "FAILED";  exit 1 )
+        echo "... OK"                       ||
+        exit 1
 
     # activate beanstalkd:
     sudo sed -i -e "s|^#START=yes.*$|START=yes|" /etc/default/beanstalkd
@@ -54,9 +54,10 @@ installExtrasTask ()
 installPhpTask ()
 {
 
-    echo -n "Installing PHP related packages ... "
-    sudo apt-get --assume-yes install   \
+    echo "Installing PHP related packages"
+    sudo apt-get -qq --assume-yes install   \
         libapache2-mod-php5             \
+        php5-cli                        \
         php5-mysql                      \
         php5-sqlite                     \
         php5-xdebug                     \
@@ -67,8 +68,8 @@ installPhpTask ()
         php5-xsl                        \
         php5-curl                       \
         php5-memcache                   &&
-        echo "OK"                       ||
-        ( echo "FAILED";  exit 1 )
+        echo "... OK"                   ||
+        exit 1
 
 
     # update php memory limit
@@ -83,27 +84,35 @@ installPhpTask ()
 
 installPearTask ()
 {
-    echo -n "Installing pear ... "
+    echo "Installing pear"
 
     sudo apt-get -qq --assume-yes install php-pear  &&
-    echo "OK"                                       ||
-    ( echo "FAILED";  exit 1 )
+    echo "... OK"                                   ||
+    exit 1
 
     echo "Installing phing"
     sudo pear -qq channel-update pear.php.net
     sudo pear -qq upgrade
     sudo pear -qq channel-discover pear.phing.info
     sudo pear -qq install phing/phing
+
+    # always set success exit code - pear might fail on
+    # already installed packages
+    exit 0
 }
 
 upgradeSystemTask ()
 {
-    echo -n "Upgrading system ... "
+
+    # ask once for sudo password ..
+    sudo true
+
+    echo "Upgrading system"
 
     sudo apt-get -qq update                 &&
     sudo apt-get -qq --assume-yes upgrade   &&
-    echo "OK"                               ||
-    ( echo "FAILED";  exit 1 )
+    echo "... OK"                           ||
+    exit 1
 }
 
 installApacheTask ()
@@ -116,12 +125,12 @@ installApacheTask ()
 
 #-----------------------------------------------------------
 
-    upgradeSystemTask
+    upgradeSystemTask   || ( echo "=== FAILED."; exit 1 )
 
-    installToolsTask
-    installExtrasTask
-    installPhpTask
-    installPearTask
-    installApacheTask
+    installToolsTask    || ( echo "=== FAILED."; exit 1 )
+    installExtrasTask   || ( echo "=== FAILED."; exit 1 )
+    installPhpTask      || ( echo "=== FAILED."; exit 1 )
+    installPearTask     || ( echo "=== FAILED."; exit 1 )
+    installApacheTask   || ( echo "=== FAILED."; exit 1 )
 
 #------------------------------------------------------- eof
