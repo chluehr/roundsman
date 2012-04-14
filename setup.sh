@@ -10,6 +10,20 @@
 # (do not execute that line blindly)
 #-----------------------------------------------------------
 
+upgradeSystemTask ()
+{
+
+    # ask once for sudo password ..
+    sudo true
+
+    echo "Upgrading system"
+
+    sudo apt-get -qq update                 &&
+    sudo apt-get -qq --assume-yes upgrade   &&
+    echo "... OK"                           ||
+    exit 1
+}
+
 installToolsTask ()
 {
     echo "Installing misc. tool packages"
@@ -31,7 +45,7 @@ installExtrasTask ()
 
     echo "Installing MySQL server, Memcache & Beanstalk daemons"
 
-    sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install     \
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq --assume-yes install     \
         mysql-server                        \
         beanstalkd                          \
         memcached                           &&
@@ -94,25 +108,11 @@ installPearTask ()
     sudo pear -qq channel-update pear.php.net
     sudo pear -qq upgrade
     sudo pear -qq channel-discover pear.phing.info
-    sudo pear -qq install phing/phing
+    sudo pear -qq install phing/phing 2>&1 >/dev/null
 
-    # always set success exit code - pear might fail on
-    # already installed packages
-    exit 0
-}
+    # test for phing:
+    phing -v 2>&1 >/dev/null || exit 1
 
-upgradeSystemTask ()
-{
-
-    # ask once for sudo password ..
-    sudo true
-
-    echo "Upgrading system"
-
-    sudo apt-get -qq update                 &&
-    sudo apt-get -qq --assume-yes upgrade   &&
-    echo "... OK"                           ||
-    exit 1
 }
 
 installApacheTask ()
@@ -121,6 +121,7 @@ installApacheTask ()
 
     sudo a2enmod rewrite
     sudo apache2ctl graceful
+    echo "... OK"
 }
 
 #-----------------------------------------------------------
@@ -132,5 +133,6 @@ installApacheTask ()
     installPhpTask      || ( echo "=== FAILED."; exit 1 )
     installPearTask     || ( echo "=== FAILED."; exit 1 )
     installApacheTask   || ( echo "=== FAILED."; exit 1 )
+    echo "SUCCESS - PHP ENVIRONMENT READY."
 
 #------------------------------------------------------- eof
