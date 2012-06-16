@@ -72,7 +72,7 @@ installPhpTask ()
     sudo apt-get -qq --assume-yes install   \
         libapache2-mod-php5             \
         php5-cli                        \
-        php5-mysql                      \
+        php5-mysqlnd                    \
         php5-sqlite                     \
         php5-xdebug                     \
         php5-xcache                     \
@@ -81,6 +81,7 @@ installPhpTask ()
         php5-mcrypt                     \
         php5-xsl                        \
         php5-curl                       \
+        php5-intl                       \
         php5-memcache                   &&
         echo "... OK"                   ||
         exit 1
@@ -98,6 +99,16 @@ installPhpTask ()
     sudo sed -i -r -e 's/^#(.*)$/;\1/' /etc/php5/cli/conf.d/mcrypt.ini  &&
         echo "OK" ||
         exit 1
+
+    echo -n "Adding extra php ini file /etc/php... "
+    read -r -d '' VAR <<-'EOF'
+        ;enable the next line for symfony2 projects ...
+        ;short_open_tag = off
+        [Date]
+        date.timezone = Europe/Berlin
+        EOF
+    sudo echo "$VAR" >/etc/php5/conf.d/zzz-roundsman-overrides.ini
+    echo "OK"
 }
 
 installPearTask ()
