@@ -5,9 +5,9 @@
 #          php environment - better use puppet or chef for
 #          real servers!
 #
-# Build and tested for ubuntu-10.04.4-server-amd64.iso
+# Target system: ubuntu-12.04-server-amd64.iso
 # wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup.sh | bash
-# (do not execute that line blindly)
+# (do not execute this line blindly)
 #-----------------------------------------------------------
 
 upgradeSystemTask ()
