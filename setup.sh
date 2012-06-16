@@ -102,12 +102,12 @@ installPhpTask ()
 
     echo -n "Adding extra php ini file /etc/php... "
     read -r -d '' VAR <<-'EOF'
-        ;enable the next line for symfony2 projects ...
-        ;short_open_tag = off
-        [Date]
-        date.timezone = Europe/Berlin
-        EOF
-    sudo echo "$VAR" >/etc/php5/conf.d/zzz-roundsman-overrides.ini
+		;enable the next line for symfony2 projects ...
+		;short_open_tag = off
+		[Date]
+		date.timezone = Europe/Berlin
+		EOF
+    echo "$VAR" |sudo tee /etc/php5/conf.d/zzz-roundsman.ini >/dev/null
     echo "OK"
 }
 
