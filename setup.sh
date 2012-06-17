@@ -18,6 +18,10 @@ upgradeSystemTask ()
 
     echo -e "\nUpgrading system ..."
 
+    sudo apt-get install --fix-broken
+    sudo apt-get autoclean
+    sudo apt-get autoremove
+
     sudo apt-get -qq update                 &&
     sudo apt-get -qq --assume-yes upgrade   &&
     echo "... OK"                           ||
