@@ -76,7 +76,7 @@ installPhpTask ()
     sudo apt-get -qq --assume-yes install   \
         libapache2-mod-php5             \
         php5-cli                        \
-        php5-mysqlnd                    \
+        php5-mysql                      \
         php5-sqlite                     \
         php5-xdebug                     \
         php5-xcache                     \
@@ -90,6 +90,8 @@ installPhpTask ()
         echo "... OK"                   ||
         return 1
 
+    # todo build in detection for mysqlnd
+    # php5-mysqlnd                      \
 
     # update php memory limit
 
