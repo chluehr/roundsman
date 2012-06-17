@@ -121,16 +121,39 @@ installPearTask ()
     echo "... OK"                                   ||
     exit 1
 
-    echo "Installing phing ... "
+	echo "Auto-discover pear channels and upgrade ..."
+	sudo pear config-set auto_discover 1
     sudo pear -qq channel-update pear.php.net
     sudo pear -qq upgrade
-    sudo pear -qq channel-discover pear.phing.info
-    sudo pear -qq install phing/phing 2>&1 >/dev/null
+	echo "... OK"
 
-    # test for phing:
+    echo "Installing / upgrading phing ... "
+	which phing >/dev/null                      &&
+		sudo pear upgrade pear.phing.info/phing ||
+		sudo pear install pear.phing.info/phing
+    # re-test for phing:
     phing -v 2>&1 >/dev/null    &&
         echo "... OK"           ||
         exit 1
+
+    echo "Installing / upgrading phpcpd ... "
+	which phpcpd >/dev/null                      &&
+		sudo pear upgrade pear.phpunit.de/phpcpd ||
+		sudo pear install pear.phpunit.de/phpcpd
+    # re-test for phpcpd:
+    phpcpd -v 2>&1 >/dev/null   &&
+        echo "... OK"           ||
+        exit 1
+
+    echo "Installing / upgrading phpcs ... "
+	which phpcs >/dev/null                             &&
+		sudo pear upgrade pear.php.net/PHP_CodeSniffer ||
+		sudo pear install pear.php.net/PHP_CodeSniffer
+    # re-test for phpcs:
+    phpcs --version 2>&1 >/dev/null   &&
+        echo "... OK"           ||
+        exit 1
+
 
 }
 
