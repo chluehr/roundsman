@@ -102,6 +102,8 @@ installPhpTask ()
 
     echo -n "Adding extra php ini file /etc/php... "
     read -r -d '' VAR <<-'EOF'
+		;allow phar execution even with suhosin patch (for composer):
+		suhosin.executor.include.whitelist="phar"
 		;enable the next line for symfony2 projects ...
 		;short_open_tag = off
 		[Date]
