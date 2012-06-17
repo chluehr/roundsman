@@ -16,7 +16,7 @@ upgradeSystemTask ()
     # ask once for sudo password ..
     sudo true
 
-    echo "Upgrading system ..."
+    echo -e "\nUpgrading system ..."
 
     sudo apt-get -qq update                 &&
     sudo apt-get -qq --assume-yes upgrade   &&
@@ -26,7 +26,7 @@ upgradeSystemTask ()
 
 installToolsTask ()
 {
-    echo "Installing misc. tool packages ..."
+    echo -e "\nInstalling misc. tool packages ..."
 
     sudo apt-get -qq --assume-yes install   \
         vim                                 \
@@ -43,7 +43,7 @@ installExtrasTask ()
 {
     # typical 3rd party systems (db,cache ..):
 
-    echo "Installing MySQL server, Memcache & Beanstalk daemons ..."
+    echo -e "\nInstalling MySQL server, Memcache & Beanstalk daemons ..."
 
     sudo DEBIAN_FRONTEND=noninteractive apt-get -qq --assume-yes install     \
         mysql-server                        \
@@ -68,7 +68,7 @@ installExtrasTask ()
 installPhpTask ()
 {
 
-    echo "Installing PHP related packages ..."
+    echo -e "\nInstalling PHP related packages ..."
     sudo apt-get -qq --assume-yes install   \
         libapache2-mod-php5             \
         php5-cli                        \
@@ -89,77 +89,85 @@ installPhpTask ()
 
     # update php memory limit
 
-    echo -n "Raising memory limit in php.ini files ... "
+    echo -e -n "\nRaising memory limit in php.ini files ... "
     sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/apache2/php.ini    &&
         sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/cli/php.ini    &&
         echo "OK"   ||
         exit 1
 
-    echo -n "Fixing annoying notice regarding wrong comment in mcrypt ini file ... "
+    echo -e -n "\nFixing annoying notice regarding wrong comment in mcrypt ini file ... "
     sudo sed -i -r -e 's/^#(.*)$/;\1/' /etc/php5/cli/conf.d/mcrypt.ini  &&
         echo "OK" ||
         exit 1
 
-    echo -n "Adding extra php ini file /etc/php... "
+    echo -e -n "\nAdding extra php ini file /etc/php... "
     read -r -d '' VAR <<-'EOF'
-		;allow phar execution even with suhosin patch (for composer):
-		suhosin.executor.include.whitelist="phar"
-		;enable the next line for symfony2 projects ...
-		;short_open_tag = off
-		[Date]
-		date.timezone = Europe/Berlin
-		EOF
+	;allow phar execution even with suhosin patch (for composer):
+	suhosin.executor.include.whitelist="phar"
+	;enable the next line for symfony2 projects ...
+	;short_open_tag = off
+	[Date]
+	date.timezone = Europe/Berlin
+	EOF
     echo "$VAR" |sudo tee /etc/php5/conf.d/zzz-roundsman.ini >/dev/null
     echo "OK"
 }
 
 installPearTask ()
 {
-    echo "Installing pear ..."
+    echo -e "\nInstalling pear ..."
 
     sudo apt-get -qq --assume-yes install php-pear  &&
     echo "... OK"                                   ||
     exit 1
 
-	echo "Auto-discover pear channels and upgrade ..."
-	sudo pear config-set auto_discover 1
+    echo -e "\nAuto-discover pear channels and upgrade ..."
+    sudo pear config-set auto_discover 1
     sudo pear -qq channel-update pear.php.net
     sudo pear -qq upgrade
-	echo "... OK"
+    echo "... OK"
 
-    echo "Installing / upgrading phing ... "
-	which phing >/dev/null                      &&
-		sudo pear upgrade pear.phing.info/phing ||
-		sudo pear install pear.phing.info/phing
+    echo -e "\nInstalling / upgrading phing ... "
+    which phing >/dev/null                      &&
+        sudo pear upgrade pear.phing.info/phing ||
+        sudo pear install pear.phing.info/phing
     # re-test for phing:
     phing -v 2>&1 >/dev/null    &&
         echo "... OK"           ||
         exit 1
 
-    echo "Installing / upgrading phpcpd ... "
-	which phpcpd >/dev/null                      &&
-		sudo pear upgrade pear.phpunit.de/phpcpd ||
-		sudo pear install pear.phpunit.de/phpcpd
+    echo -e "\nInstalling / upgrading phpcpd ... "
+    which phpcpd >/dev/null                      &&
+        sudo pear upgrade pear.phpunit.de/phpcpd ||
+        sudo pear install pear.phpunit.de/phpcpd
     # re-test for phpcpd:
     phpcpd -v 2>&1 >/dev/null   &&
         echo "... OK"           ||
         exit 1
 
-    echo "Installing / upgrading phpcs ... "
-	which phpcs >/dev/null                             &&
-		sudo pear upgrade pear.php.net/PHP_CodeSniffer ||
-		sudo pear install pear.php.net/PHP_CodeSniffer
+
+    echo -e "\nInstalling / upgrading phpcs ... "
+    which phpcs >/dev/null                             &&
+        sudo pear upgrade pear.php.net/PHP_CodeSniffer ||
+        sudo pear install pear.php.net/PHP_CodeSniffer
     # re-test for phpcs:
     phpcs --version 2>&1 >/dev/null   &&
         echo "... OK"           ||
         exit 1
 
-
+    echo -e "\nInstalling / upgrading phpunit ... "
+    which phpcs >/dev/null                        &&
+        sudo pear upgrade pear.phpunit.de/phpunit ||
+        sudo pear install pear.phpunit.de/phpunit
+    # re-test for phpcs:
+    phpunit --version 2>&1 >/dev/null  &&
+        echo "... OK"           ||
+        return 1
 }
 
 installApacheTask ()
 {
-    echo "Enabling Apache mod_rewrite & restarting Apache ..."
+    echo -e "\nEnabling Apache mod_rewrite & restarting Apache ..."
 
     sudo a2enmod rewrite
     sudo apache2ctl graceful
@@ -168,13 +176,13 @@ installApacheTask ()
 
 #-----------------------------------------------------------
 
-    upgradeSystemTask   || ( echo "=== FAILED."; exit 1 )
-
-    installToolsTask    || ( echo "=== FAILED."; exit 1 )
-    installExtrasTask   || ( echo "=== FAILED."; exit 1 )
-    installPhpTask      || ( echo "=== FAILED."; exit 1 )
-    installPearTask     || ( echo "=== FAILED."; exit 1 )
-    installApacheTask   || ( echo "=== FAILED."; exit 1 )
-    echo "SUCCESS - PHP ENVIRONMENT READY."
+    upgradeSystemTask   &&
+    installToolsTask    &&
+    installExtrasTask   &&
+    installPhpTask      &&
+    installPearTask     &&
+    installApacheTask	&&
+        echo -e "\nSUCCESS - PHP ENVIRONMENT READY." ||
+        ( echo "=== FAILED."; exit 1 )
 
 #------------------------------------------------------- eof
