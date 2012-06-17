@@ -21,7 +21,7 @@ upgradeSystemTask ()
     sudo apt-get -qq update                 &&
     sudo apt-get -qq --assume-yes upgrade   &&
     echo "... OK"                           ||
-    exit 1
+    return 1
 }
 
 installToolsTask ()
@@ -35,7 +35,7 @@ installToolsTask ()
         rsync                               \
         screen                              &&
         echo "... OK"                       ||
-        exit 1
+        return 1
 }
 
 
@@ -50,7 +50,7 @@ installExtrasTask ()
         beanstalkd                          \
         memcached                           &&
         echo "... OK"                       ||
-        exit 1
+        return 1
 
     # activate beanstalkd:
     sudo sed -i -e "s|^#START=yes.*$|START=yes|" /etc/default/beanstalkd
@@ -84,7 +84,7 @@ installPhpTask ()
         php5-intl                       \
         php5-memcache                   &&
         echo "... OK"                   ||
-        exit 1
+        return 1
 
 
     # update php memory limit
@@ -93,12 +93,12 @@ installPhpTask ()
     sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/apache2/php.ini    &&
         sudo sed -i -r 's/^ *memory_limit *= *.*/memory_limit = 512M/' /etc/php5/cli/php.ini    &&
         echo "OK"   ||
-        exit 1
+        return 1
 
     echo -e -n "\nFixing annoying notice regarding wrong comment in mcrypt ini file ... "
     sudo sed -i -r -e 's/^#(.*)$/;\1/' /etc/php5/cli/conf.d/mcrypt.ini  &&
         echo "OK" ||
-        exit 1
+        return 1
 
     echo -e -n "\nAdding extra php ini file /etc/php... "
     read -r -d '' VAR <<-'EOF'
@@ -119,7 +119,7 @@ installPearTask ()
 
     sudo apt-get -qq --assume-yes install php-pear  &&
     echo "... OK"                                   ||
-    exit 1
+    return 1
 
     echo -e "\nAuto-discover pear channels and upgrade ..."
     sudo pear config-set auto_discover 1
@@ -134,7 +134,7 @@ installPearTask ()
     # re-test for phing:
     phing -v 2>&1 >/dev/null    &&
         echo "... OK"           ||
-        exit 1
+        return 1
 
     echo -e "\nInstalling / upgrading phpcpd ... "
     which phpcpd >/dev/null                      &&
@@ -143,7 +143,7 @@ installPearTask ()
     # re-test for phpcpd:
     phpcpd -v 2>&1 >/dev/null   &&
         echo "... OK"           ||
-        exit 1
+        return 1
 
 
     echo -e "\nInstalling / upgrading phpcs ... "
@@ -153,14 +153,54 @@ installPearTask ()
     # re-test for phpcs:
     phpcs --version 2>&1 >/dev/null   &&
         echo "... OK"           ||
-        exit 1
+        return 1
+
+    echo -e "\nInstalling / upgrading phpcs Symfony2 coding standard... "
+    cd /usr/share/php/PHP/CodeSniffer/Standards
+    if test -d Symfony2
+    then
+	cd Symfony2
+        sudo git pull
+    else
+        sudo git clone git://github.com/opensky/Symfony2-coding-standard.git Symfony2
+    fi
+    sudo phpcs --config-set default_standard Symfony2
+    echo "... OK"
+
 
     echo -e "\nInstalling / upgrading phpunit ... "
-    which phpcs >/dev/null                        &&
+    which phpunit >/dev/null                        &&
         sudo pear upgrade pear.phpunit.de/phpunit ||
         sudo pear install pear.phpunit.de/phpunit
-    # re-test for phpcs:
+    # re-test for phpunit:
     phpunit --version 2>&1 >/dev/null  &&
+        echo "... OK"           ||
+        return 1
+
+    echo -e "\nInstalling / upgrading pdepend ... "
+    which pdepend >/dev/null                       &&
+        sudo pear upgrade pear.pdepend.org/PHP_Depend ||
+        sudo pear install pear.pdepend.org/PHP_Depend
+    # re-test for pdepend:
+    pdepend --version 2>&1 >/dev/null  &&
+        echo "... OK"           ||
+        return 1
+
+    echo -e "\nInstalling / upgrading phpmd ... "
+    which phpmd >/dev/null                       &&
+        sudo pear upgrade pear.phpmd.org/PHP_PMD ||
+        sudo pear install --alldeps pear.phpmd.org/PHP_PMD
+    # re-test for phpmd:
+    phpmd --version 2>&1 >/dev/null  &&
+        echo "... OK"           ||
+        return 1
+
+    echo -e "\nInstalling / upgrading phpdoc ... "
+    which phpdoc >/dev/null                       &&
+        sudo pear upgrade pear.phpdoc.org/phpDocumentor-alpha ||
+        sudo pear install pear.phpdoc.org/phpDocumentor-alpha
+    # re-test for phpmd:
+    phpdoc --version 2>&1 >/dev/null  &&
         echo "... OK"           ||
         return 1
 }
