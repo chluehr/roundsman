@@ -32,7 +32,7 @@ installToolsTask ()
 {
     echo -e "\nInstalling misc. tool packages ..."
 
-    sudo apt-get -qq --assume-yes install   \
+    sudo apt-get --assume-yes install   \
         vim                                 \
         git-core                            \
         imagemagick                         \
