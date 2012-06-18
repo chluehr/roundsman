@@ -3,7 +3,7 @@
 #
 # Purpose: Just run this script to setup a typical working
 #          php environment - better use puppet or chef for
-#          real servers!
+#          real servers! 
 #
 # Target system: ubuntu-12.04-server-amd64.iso
 # wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup.sh | bash
