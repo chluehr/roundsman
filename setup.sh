@@ -140,10 +140,9 @@ installPearTask ()
 
     echo "DEBUG which phing:"
     echo $PATH
-    which phing
-    ls -lr /usr/share/php/
+    phpenv which phing
+    ls -lr /home/vagrant/.phpenv/bin
     echo "------------------"
-    ls -l /usr/bin/p*
 
 
     # re-test for phing:
