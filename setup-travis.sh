@@ -22,6 +22,9 @@ installPearTask ()
         pear upgrade pear.phing.info/phing ||
         pear install pear.phing.info/phing
 
+    # update paths
+    phpenv rehash
+
     echo "DEBUG which phing:"
     echo $PATH
     phpenv which phing

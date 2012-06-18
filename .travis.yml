@@ -2,5 +2,5 @@ language: php
 php:
   - 5.3
 before_script: wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup-travis.sh
-script: phpenv ./setup-travis.sh
+script: ./setup-travis.sh
 
