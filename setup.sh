@@ -137,6 +137,15 @@ installPearTask ()
     which phing >/dev/null                      &&
         sudo pear upgrade pear.phing.info/phing ||
         sudo pear install pear.phing.info/phing
+
+    echo "DEBUG which phing:"
+    echo $PATH
+    which phing
+    ls -lr /usr/share/php/
+    echo "------------------"
+    ls -l /usr/bin/p*
+
+
     # re-test for phing:
     phing -v 2>&1 >/dev/null    &&
         echo "... OK"           ||
