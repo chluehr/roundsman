@@ -1,11 +1,10 @@
 #!/bin/bash
 #-----------------------------------------------------------
 #
-# Purpose: Just run this script to setup a typical working
-#          php environment for travis-ci
+# Purpose: Run phing in a travis environment
 #
 # Target system: travis-ci
-# wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup-travis.sh | bash
+# wget -q -O - https://raw.github.com/chluehr/roundsman/master/travis-phing.sh | bash
 # (do not execute this line blindly)
 #-----------------------------------------------------------
 
@@ -20,17 +19,10 @@ installPearTask ()
     echo -e "\nInstalling / upgrading phing ... "
     which phing >/dev/null                      &&
         pear upgrade pear.phing.info/phing ||
-        pear install pear.phing.info/phing
+        pear install --alldeps pear.phing.info/phing
 
     # update paths
     phpenv rehash
-
-    echo "DEBUG which phing:"
-    echo $PATH
-    phpenv which phing
-    ls -lr /home/vagrant/.phpenv/bin
-    echo "------------------"
-
 
     # re-test for phing:
     phing -v 2>&1 >/dev/null    &&
@@ -44,5 +36,7 @@ installPearTask ()
     installPearTask &&
         echo -e "\nSUCCESS - PHP ENVIRONMENT READY." ||
         ( echo "=== FAILED."; exit 1 )
+
+    phing $*
 
 #------------------------------------------------------- eof

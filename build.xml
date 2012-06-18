@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="roundsman" default="default">
+<target name="default">
+  <echo msg="Phing works!" />
+</target>
+</project>

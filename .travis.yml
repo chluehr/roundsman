@@ -1,6 +1,7 @@
 language: php
 php:
   - 5.3
-before_script: wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup-travis.sh
-script: ./setup-travis.sh
+  - 5.4
+before_script: wget -q -O - https://raw.github.com/chluehr/roundsman/master/travis-phing.sh
+script: ./travis-phing.sh
 
