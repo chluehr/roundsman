@@ -137,14 +137,6 @@ installPearTask ()
     which phing >/dev/null                      &&
         sudo pear upgrade pear.phing.info/phing ||
         sudo pear install pear.phing.info/phing
-
-    echo "DEBUG which phing:"
-    echo $PATH
-    phpenv which phing
-    ls -lr /home/vagrant/.phpenv/bin
-    echo "------------------"
-
-
     # re-test for phing:
     phing -v 2>&1 >/dev/null    &&
         echo "... OK"           ||
@@ -158,7 +150,6 @@ installPearTask ()
     phpcpd -v 2>&1 >/dev/null   &&
         echo "... OK"           ||
         return 1
-
 
     echo -e "\nInstalling / upgrading phpcs ... "
     which phpcs >/dev/null                             &&

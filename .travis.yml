@@ -1,4 +1,4 @@
 language: php
-before_script: wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup.sh
-script: ./setup.sh
+before_script: wget -q -O - https://raw.github.com/chluehr/roundsman/master/setup-travis.sh
+script: ./setup-travis.sh
 
