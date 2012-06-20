@@ -212,9 +212,10 @@ installPearTask ()
 
 installApacheTask ()
 {
-    echo -e "\nEnabling Apache mod_rewrite & restarting Apache ..."
+    echo -e "\nEnabling Apache mod_rewrite, mod_ssl & restarting Apache ..."
 
     sudo a2enmod rewrite
+    sudo a2enmod ssl
     sudo apache2ctl graceful
     echo "... OK"
 }
