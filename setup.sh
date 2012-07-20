@@ -85,6 +85,7 @@ installPhpTask ()
         php5-mcrypt                     \
         php5-xsl                        \
         php5-curl                       \
+        php5-imagick                    \
         php5-intl                       \
         php5-memcache                   &&
         echo "... OK"                   ||
